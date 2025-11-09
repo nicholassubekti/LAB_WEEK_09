@@ -32,6 +32,13 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.example.lab_week_09.ui.theme.OnBackgroundTitleText
 import com.example.lab_week_09.ui.theme.OnBackgroundItemText
 import com.example.lab_week_09.ui.theme.PrimaryTextButton
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
+import androidx.compose.foundation.layout.Row // Untuk Row di HomeContent
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +49,8 @@ class MainActivity : ComponentActivity() {
     modifier = Modifier.fillMaxSize(),
     color = MaterialTheme.colorScheme.background
 ) {
-    Home()
+    val navController = rememberNavController()
+    App(navController = navController)
 }
             }
         }
@@ -54,7 +62,7 @@ data class Student(
 )
 
 @Composable
-fun Home() {
+fun Home(navigateFromHomeToResult: (String) -> Unit) {
     val listData = remember { mutableStateListOf(
         Student("Tanu"),
         Student("Tina"),
@@ -62,17 +70,17 @@ fun Home() {
     ) }
     var inputField = remember { mutableStateOf(Student("")) }
 
-    HomeContent(
+   HomeContent(
         listData,
         inputField.value,
-        { input -> inputField.value = inputField.value.copy(name = input) }, // Perbaiki copy untuk name
+        { input -> inputField.value = inputField.value.copy(name = input) },
         {
             if (inputField.value.name.isNotBlank()) {
                 listData.add(inputField.value)
                 inputField.value = Student("")
             }
-        }
-
+        },
+        { navigateFromHomeToResult(listData.toList().toString()) } // Panggil navigate
     )
 }
 
@@ -81,7 +89,8 @@ fun HomeContent(
     listData: SnapshotStateList<Student>,
     inputField: Student,
     onInputValueChange: (String) -> Unit,
-    onButtonClick: () -> Unit
+    onButtonClick: () -> Unit,
+    navigateFromHomeToResult: () -> Unit // Tambah ini
 ) {
     LazyColumn {
     item {
@@ -101,8 +110,13 @@ fun HomeContent(
                     onInputValueChange(it)
                 }
             )
-            PrimaryTextButton(text = stringResource(id = R.string.button_click)) {
-                onButtonClick()
+            Row {
+                PrimaryTextButton(text = stringResource(id = R.string.button_click)) {
+                    onButtonClick()
+                }
+                PrimaryTextButton(text = stringResource(id = R.string.button_navigate)) {
+                    navigateFromHomeToResult()
+                }
             }
         }
     }
@@ -117,5 +131,35 @@ fun HomeContent(
         }
     }
 }
+}
+
+@Composable
+fun App(navController: NavHostController) {
+    NavHost(
+        navController = navController,
+        startDestination = "home"
+    ) {
+        composable("home") {
+            Home { navController.navigate("resultContent/?listData=$it") }
+        }
+        composable(
+            "resultContent/?listData={listData}",
+            arguments = listOf(navArgument("listData") { type = NavType.StringType })
+        ) {
+            ResultContent(it.arguments?.getString("listData").orEmpty())
+        }
+    }
+}
+
+@Composable
+fun ResultContent(listData: String) {
+    Column(
+        modifier = Modifier
+            .padding(vertical = 4.dp)
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        OnBackgroundItemText(text = listData)
+    }
 }
 
