@@ -29,6 +29,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.example.lab_week_09.ui.theme.OnBackgroundTitleText
+import com.example.lab_week_09.ui.theme.OnBackgroundItemText
+import com.example.lab_week_09.ui.theme.PrimaryTextButton
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,6 +72,7 @@ fun Home() {
                 inputField.value = Student("")
             }
         }
+
     )
 }
 
@@ -80,36 +84,38 @@ fun HomeContent(
     onButtonClick: () -> Unit
 ) {
     LazyColumn {
-        item {
-            Column(
-                modifier = Modifier.padding(16.dp).fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = stringResource(id = R.string.enter_item))
-                TextField(
-                    value = inputField.name,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text
-                    ),
-                    onValueChange = {
-                        onInputValueChange(it)
-                    }
-                )
-                Button(onClick = {
-                    onButtonClick()
-                }) {
-                    Text(text = stringResource(id = R.string.button_click))
+    item {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OnBackgroundTitleText(text = stringResource(id = R.string.enter_item))
+            TextField(
+                value = inputField.name,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text
+                ),
+                onValueChange = {
+                    onInputValueChange(it)
                 }
-            }
-        }
-        items(listData) { item ->
-            Column(
-                modifier = Modifier.padding(vertical = 4.dp).fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = item.name)
+            )
+            PrimaryTextButton(text = stringResource(id = R.string.button_click)) {
+                onButtonClick()
             }
         }
     }
+    items(listData) { item ->
+        Column(
+            modifier = Modifier
+                .padding(vertical = 4.dp)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OnBackgroundItemText(text = item.name)
+        }
+    }
+}
 }
 
